@@ -1,8 +1,9 @@
-#https://www.zhihu.com/api/v4/questions/586488911//answers?include=content&limit=5&offset=10
+# https://www.zhihu.com/api/v4/questions/586488911//answers?include=content&limit=5&offset=10
 from user import User
 from comments import Comment
 import requests
 from random import randint
+
 
 class Answer:
     def __init__(self) -> None:
@@ -12,7 +13,7 @@ class Answer:
         self.update_time = 0
         self.comments = []
         self.comments_count = -1
-    
+
     def update(self, data, update_comments=False, limit=-1):
         self.answer_id = data['id']
         self.user = User(
@@ -41,16 +42,17 @@ class Answer:
                 tmp.update(comment)
                 self.comments.append(tmp)
             offset = f"{randint(0, 9)}_{self.comments[-1].comment_id}_{0}"
-            if data['paging']['is_end'] or (l>0 and len(self.comments)>l):
+            if data['paging']['is_end'] or (l > 0 and len(self.comments) > l):
                 break
 
 
 class Question:
-    def __init__(self, id) -> None:
+    def __init__(self, id, answer_count=0, title="") -> None:
         self.question_id = id
+        self.title = title
         self.answers = []
-        self.answer_count = 0
-    
+        self.answer_count = answer_count
+
     def get_step(self, limit=5, offset=0):
         url = f"https://www.zhihu.com/api/v4/questions/{self.question_id}//answers?include=content&limit={limit}&offset={offset}"
         response = requests.get(url).json()
@@ -60,9 +62,8 @@ class Question:
             tmp.update(answer)
             self.answers.append(tmp)
         return offset + limit
-    
+
     def get(self, total=100, limit=0):
         offset = 0
         while len(self.answers) < min(self.answer_count, total):
             offset = self.get_step(limit, offset)
-    
